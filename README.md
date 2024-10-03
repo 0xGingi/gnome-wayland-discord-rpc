@@ -32,7 +32,7 @@ This shows the active window in your Discord status including the application ic
 3. Create a `config.json` file in the project root with your Discord and Imgur credentials:
    ```json
    {
-     "DISCORD_CLIENT_ID": "your_discord_client_id_here", // I reccomend setting the name as your Distro or something
+     "DISCORD_CLIENT_ID": "your_discord_client_id_here", // I recommend setting the name as your Distro or something
      "IMGUR_CLIENT_ID": "your_imgur_client_id_here"
    }
    ```
