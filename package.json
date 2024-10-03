@@ -1,0 +1,19 @@
+{
+  "name": "discord-rpc-gnome-wayland",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --no-deprecation index.js"
+  },
+  "author": "0xGingi",
+  "license": "MIT",
+  "description": "Discord RPC for Active Windows onWayland",
+  "dependencies": {
+    "active-win": "^8.2.1",
+    "axios": "^1.7.7",
+    "discord-rpc": "^4.0.1",
+    "form-data": "^4.0.0",
+    "imgur": "^2.4.2",
+    "sharp": "^0.33.5"
+  }
+}
