@@ -60,22 +60,53 @@ async function getActiveWindow() {
 
 async function getIconPath(desktopFile, appName) {
     if (!desktopFile && !appName) return null;
-
-    console.log(`Searching for icon for ${appName}`);
     
     const homeDir = os.homedir();
+    const appNameLower = appName.toLowerCase();
+    const appNameNoSpaces = appNameLower.replace(/\s+/g, '');
+    const appNameDashed = appNameLower.replace(/\s+/g, '-');
+
     const iconLocations = [
-        `/usr/share/icons/hicolor/512x512/apps/${appName.toLowerCase()}.png`,
-        `/usr/share/icons/hicolor/256x256/apps/${appName.toLowerCase()}.png`,
-        `/usr/share/icons/hicolor/128x128/apps/${appName.toLowerCase()}.png`,
-        `/usr/share/icons/hicolor/64x64/apps/${appName.toLowerCase()}.png`,
-        `/usr/share/pixmaps/${appName.toLowerCase()}.png`,
-        `/usr/share/icons/${appName.toLowerCase()}.png`,
-        `/opt/${appName.toLowerCase()}/${appName.toLowerCase()}.png`,
-        `~/.local/share/icons/${appName.toLowerCase()}.png`,
+        `/usr/share/icons/hicolor/512x512/apps/${appNameLower}.png`,
+        `/usr/share/icons/hicolor/256x256/apps/${appNameLower}.png`,
+        `/usr/share/icons/hicolor/128x128/apps/${appNameLower}.png`,
+        `/usr/share/icons/hicolor/64x64/apps/${appNameLower}.png`,
+        `/usr/share/pixmaps/${appNameLower}.png`,
+        `/usr/share/icons/${appNameLower}.png`,
+        `/opt/${appNameLower}/${appNameLower}.png`,
+        `~/.local/share/icons/${appNameLower}.png`,
+        `/usr/share/icons/hicolor/512x512/apps/${appNameNoSpaces}.png`,
+        `/usr/share/icons/hicolor/256x256/apps/${appNameNoSpaces}.png`,
+        `/usr/share/icons/hicolor/128x128/apps/${appNameNoSpaces}.png`,
+        `/usr/share/icons/hicolor/64x64/apps/${appNameNoSpaces}.png`,
+        `/usr/share/pixmaps/${appNameNoSpaces}.png`,
+        `/usr/share/icons/${appNameNoSpaces}.png`,
+        `/usr/share/icons/hicolor/512x512/apps/${appNameDashed}.png`,
+        `/usr/share/icons/hicolor/256x256/apps/${appNameDashed}.png`,
+        `/usr/share/icons/hicolor/128x128/apps/${appNameDashed}.png`,
+        `/usr/share/icons/hicolor/64x64/apps/${appNameDashed}.png`,
+        `/usr/share/pixmaps/${appNameDashed}.png`,
+        `/usr/share/icons/${appNameDashed}.png`,
         `/usr/share/icons/hicolor/128x128/apps/${appName.toLowerCase()}-browser.png`,
+        `/usr/share/icons/hicolor/256x256/apps/${appName.toLowerCase()}-browser.png`,
+        `/usr/share/icons/hicolor/512x512/apps/${appName.toLowerCase()}-browser.png`,
         `${homeDir}/AppImages/.icons/${appName.toLowerCase()}.png`,
     ];
+
+    if (!desktopFile) {
+        try {
+            const { stdout: foundDesktopFile } = await execPromise(`
+                find /usr/share/applications ~/.local/share/applications ${homeDir}/.local/share/applications -type f -iname "*${appNameLower}*.desktop" -print -quit
+            `);
+            
+            if (foundDesktopFile.trim()) {
+                desktopFile = foundDesktopFile.trim();
+                console.log(`Found .desktop file: ${desktopFile}`);
+            }
+        } catch (error) {
+            console.error('Error searching for .desktop file:', error);
+        }
+    }
 
     for (const location of iconLocations) {
         console.log(`Checking location: ${location}`);
@@ -107,6 +138,21 @@ async function getIconPath(desktopFile, appName) {
             }
         } catch (error) {
             console.error('Error reading .desktop file:', error);
+        }
+    }
+
+    if (!iconPath) {
+        try {
+            const { stdout: directIconPath } = await execPromise(`
+                find /usr/share/icons /usr/share/pixmaps ~/.local/share/icons -type f \\( -name "${appNameLower}.png" -o -name "${appNameLower}.svg" -o -name "${appNameLower}.xpm" \\) -print -quit
+            `);
+            
+            if (directIconPath.trim()) {
+                console.log(`Found icon directly: ${directIconPath.trim()}`);
+                return directIconPath.trim();
+            }
+        } catch (error) {
+            console.error('Error searching for icon directly:', error);
         }
     }
 
