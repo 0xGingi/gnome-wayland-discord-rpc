@@ -80,7 +80,6 @@ async function getIconPath(desktopFile, appName) {
             console.log(`Found icon at: ${location}`);
             return location;
         } catch (error) {
-            // Icon not found at this location
         }
     }
 
@@ -150,7 +149,6 @@ async function uploadToImgur(iconPath) {
         let imageBuffer = await fs.readFile(iconPath);
         let contentType = 'image/png';
 
-        // Convert image to PNG if it's not already
         if (path.extname(iconPath).toLowerCase() !== '.png') {
             console.log(`Converting ${iconPath} to PNG`);
             imageBuffer = await sharp(imageBuffer)
@@ -193,7 +191,6 @@ const updateActivity = async () => {
     try {
         const window = await getActiveWindow();
         if (window && window.appName) {
-            // Check if the window has changed
             if (!lastActiveWindow || lastActiveWindow.appName !== window.appName) {
                 console.log(`Window changed. Updating activity for ${window.appName}`);
                 let iconPath = await getIconPath(window.desktopFile, window.appName);
