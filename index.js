@@ -9,6 +9,7 @@ const FormData = require('form-data');
 const path = require('path');
 const config = require('./config.json');
 const sharp = require('sharp');
+const os = require('os');
 
 const execPromise = util.promisify(exec);
 
@@ -19,6 +20,7 @@ let lastActiveWindow = null;
 
 async function getActiveWindow() {
     try {
+        const homeDir = os.homedir();
         const { stdout: appClass } = await execPromise(`
             gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/WindowsExt --method org.gnome.Shell.Extensions.WindowsExt.FocusClass
         `);
@@ -28,9 +30,9 @@ async function getActiveWindow() {
         simplifiedAppName = simplifiedAppName.charAt(0).toUpperCase() + simplifiedAppName.slice(1);
                 
         const { stdout: desktopFile } = await execPromise(`
-            find /usr/share/applications ~/.local/share/applications -iname "*${simplifiedAppName.toLowerCase()}*.desktop" -print -quit
+            find /usr/share/applications ~/.local/share/applications ${homeDir}/AppImages -iname "*${simplifiedAppName.toLowerCase()}*.desktop" -print -quit
         `);
-        
+
         if (desktopFile.trim()) {
             
             const { stdout: iconName } = await execPromise(`
@@ -60,7 +62,8 @@ async function getIconPath(desktopFile, appName) {
     if (!desktopFile && !appName) return null;
 
     console.log(`Searching for icon for ${appName}`);
-
+    
+    const homeDir = os.homedir();
     const iconLocations = [
         `/usr/share/icons/hicolor/512x512/apps/${appName.toLowerCase()}.png`,
         `/usr/share/icons/hicolor/256x256/apps/${appName.toLowerCase()}.png`,
@@ -71,6 +74,7 @@ async function getIconPath(desktopFile, appName) {
         `/opt/${appName.toLowerCase()}/${appName.toLowerCase()}.png`,
         `~/.local/share/icons/${appName.toLowerCase()}.png`,
         `/usr/share/icons/hicolor/128x128/apps/${appName.toLowerCase()}-browser.png`,
+        `${homeDir}/AppImages/.icons/${appName.toLowerCase()}.png`,
     ];
 
     for (const location of iconLocations) {
